@@ -19,16 +19,29 @@ export default function Register() {
     
     setIsLoading(true)
     try {
-      // Forzamos la obtención del token antes del POST
-      await api.get('/api/auth/csrf');
+      // 1. Guardamos la respuesta del GET
+      const csrfResponse = await api.get('/api/auth/csrf');
       
-      const res = await api.post('/api/auth/register', { username, password, role: 'ROLE_USER' });
+      // 2. Extraemos el token de la cabecera expuesta (Axios la lee en minúsculas)
+      const csrfToken = csrfResponse.headers['x-xsrf-token'];
+      
+      // 3. Enviamos el POST inyectando la cabecera explícitamente
+      const res = await api.post(
+        '/api/auth/register', 
+        { username, password, role: 'ROLE_USER' },
+        {
+          headers: {
+            'X-XSRF-TOKEN': csrfToken
+          }
+        }
+      );
+      
       notifySuccess('Registro exitoso. Redirigiendo a login...');
       setTimeout(() => {
         window.location.href = '/login';
       }, 2000);
     } catch (err) {
-      // Capturamos el mensaje de error de tu Regex (mayúsculas, etc.)
+      // Capturamos el mensaje de error
       notifyError(err.response?.data?.message || err.response?.data || 'Error en validación');
     } finally {
       setIsLoading(false)
