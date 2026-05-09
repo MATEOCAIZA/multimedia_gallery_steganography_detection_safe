@@ -5,7 +5,9 @@ export const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:80
 
 export const api = axios.create({
   baseURL: API_BASE_URL,
-  withCredentials: true, // INDISPENSABLE para enviar el JSESSIONID del login
+  withCredentials: true,
+  xsrfCookieName: 'XSRF-TOKEN',
+  xsrfHeaderName: 'X-XSRF-TOKEN' // INDISPENSABLE para enviar el JSESSIONID del login
 });
 
 // Interceptor para añadir el token CSRF manualmente si Axios no lo detecta solo
