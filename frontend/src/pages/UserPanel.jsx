@@ -47,8 +47,17 @@ export default function UserPanel() {
     }
 
     try {
-      await api.get('/api/auth/csrf');
-      const res = await api.post('/api/albums/solicitar-lote', formData);
+      // 1. Obtenemos el token
+      const csrfResponse = await api.get('/api/auth/csrf');
+      const csrfToken = csrfResponse.headers['x-xsrf-token'];
+
+      // 2. Enviamos el POST inyectando la cabecera
+      const res = await api.post('/api/albums/solicitar-lote', formData, {
+        headers: {
+          'X-XSRF-TOKEN': csrfToken
+        }
+      });
+      
       notifySuccess('✅ Álbum creado. En revisión si incluye archivos.');
       
       // Limpiar formulario 1
@@ -62,6 +71,7 @@ export default function UserPanel() {
     }
   };
 
+  // --- Función 2: Subir archivos a álbum existente ---
   const subirArchivoExtra = async (e) => {
     e.preventDefault();
     if (archivosExtra.length === 0 || !albumId) {
@@ -78,8 +88,17 @@ export default function UserPanel() {
     }
 
     try {
-      await api.get('/api/auth/csrf');
-      const res = await api.post(`/api/images/upload/${albumId}`, formData);
+      // 1. Obtenemos el token
+      const csrfResponse = await api.get('/api/auth/csrf');
+      const csrfToken = csrfResponse.headers['x-xsrf-token'];
+
+      // 2. Enviamos el POST inyectando la cabecera
+      const res = await api.post(`/api/images/upload/${albumId}`, formData, {
+        headers: {
+          'X-XSRF-TOKEN': csrfToken
+        }
+      });
+      
       notifySuccess('✅ Archivos subidos correctamente');
       
       // Limpiar formulario 2

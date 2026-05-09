@@ -32,10 +32,20 @@ export default function SupervisorPanel() {
     if (!id || !accion) return;
 
     try {
-      await api.get('/api/auth/csrf');
+      // 1. Obtenemos el token CSRF
+      const csrfResponse = await api.get('/api/auth/csrf');
+      const csrfToken = csrfResponse.headers['x-xsrf-token'];
+      
+      // 2. Configuramos la cabecera
+      const config = {
+        headers: { 'X-XSRF-TOKEN': csrfToken }
+      };
+
+      // 3. Ejecutamos la petición asegurando la sintaxis correcta de Axios
+      // POST: (url, body, config) | DELETE: (url, config)
       const res = accion === 'aprobar'
-        ? await api.post(`/api/admin/albums/${id}/aprobar`)
-        : await api.delete(`/api/admin/albums/${id}/rechazar`);
+        ? await api.post(`/api/admin/albums/${id}/aprobar`, {}, config)
+        : await api.delete(`/api/admin/albums/${id}/rechazar`, config);
 
       notifySuccess(`✅ ${res.data}`);
       cargarSolicitudes();
@@ -46,10 +56,19 @@ export default function SupervisorPanel() {
 
   const manejarAccionImagen = async (id, accion) => {
     try {
-      await api.get('/api/auth/csrf');
+      // 1. Obtenemos el token CSRF
+      const csrfResponse = await api.get('/api/auth/csrf');
+      const csrfToken = csrfResponse.headers['x-xsrf-token'];
+      
+      // 2. Configuramos la cabecera
+      const config = {
+        headers: { 'X-XSRF-TOKEN': csrfToken }
+      };
+
+      // 3. Ejecutamos PUT (url, body, config)
       const res = accion === 'aprobar'
-        ? await api.put(`/api/admin/image/${id}/approve`)
-        : await api.put(`/api/admin/image/${id}/reject`);
+        ? await api.put(`/api/admin/image/${id}/approve`, {}, config)
+        : await api.put(`/api/admin/image/${id}/reject`, {}, config);
         
       notifySuccess(`✅ ${res.data}`);
       cargarSolicitudes();

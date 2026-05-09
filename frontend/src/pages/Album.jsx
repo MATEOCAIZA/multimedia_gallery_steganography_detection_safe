@@ -49,8 +49,18 @@ export default function Album() {
     }
 
     try {
-      await api.get('/api/auth/csrf');
-      const res = await api.post(`/api/images/upload/${id}`, formData);
+      // 1. Guardamos la respuesta del GET para atrapar el token
+      const csrfResponse = await api.get('/api/auth/csrf');
+      
+      // 2. Extraemos el token de la cabecera expuesta
+      const csrfToken = csrfResponse.headers['x-xsrf-token'];
+
+      // 3. Enviamos el POST (FormData) inyectando la cabecera explícitamente
+      const res = await api.post(`/api/images/upload/${id}`, formData, {
+        headers: {
+          'X-XSRF-TOKEN': csrfToken
+        }
+      });
       
       setUploadMessage(`✅ ${res.data}`);
       setArchivosExtra([]);
