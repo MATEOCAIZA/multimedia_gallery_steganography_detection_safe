@@ -27,13 +27,24 @@ export default function Login() {
     }
 
     try {
-      await api.get('/api/auth/csrf');
+      // 1. Guardamos la respuesta del GET para atrapar el token
+      const csrfResponse = await api.get('/api/auth/csrf');
       
-      // Enviamos los datos ya saneados
-      const res = await api.post('/api/auth/login', { 
-        username: cleanUsername, 
-        password: cleanPassword 
-      });
+      // 2. Extraemos el token de la cabecera expuesta
+      const csrfToken = csrfResponse.headers['x-xsrf-token'];
+      
+      // 3. Enviamos los datos inyectando la cabecera explícitamente
+      const res = await api.post('/api/auth/login', 
+        { 
+          username: cleanUsername, 
+          password: cleanPassword 
+        },
+        {
+          headers: {
+            'X-XSRF-TOKEN': csrfToken
+          }
+        }
+      );
       
       localStorage.setItem('user', JSON.stringify(res.data));
       notifySuccess('¡Bienvenido! Redirigiendo...');
@@ -53,7 +64,6 @@ export default function Login() {
 
   return (
     <div className="login-view">
-      {/* ... (Sección login-splash se mantiene igual) ... */}
       <section className="login-splash" aria-hidden="true">
         <h2>Bienvenido a tu galería privada</h2>
         <p>
